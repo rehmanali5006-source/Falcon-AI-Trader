@@ -1,22 +1,7 @@
 COINS = [
     "BTCUSDT",
     "ETHUSDT",
-    "SOLUSDT",
     "BNBUSDT",
+    "SOLUSDT",
     "XRPUSDT",
-    "DOGEUSDT",
-    "ADAUSDT",
-    "LINKUSDT",
-    "AVAXUSDT",
-    "SUIUSDT",
-    "AAVEUSDT",
-    "INJUSDT",
-    "ONDOUSDT",
-    "ARBUSDT",
-    "OPUSDT",
-    "SEIUSDT",
-    "FETUSDT",
-    "LTCUSDT",
-    "WIFUSDT",
-    "HYPEUSDT"
 ]
