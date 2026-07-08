@@ -1,8 +1,11 @@
 import requests
+import pandas as pd
 
 BASE_URL = "https://api.bybit.com/v5/market/kline"
 
+
 def get_candles(symbol, interval="60", limit=200):
+
     params = {
         "category": "linear",
         "symbol": symbol,
@@ -18,4 +21,27 @@ def get_candles(symbol, interval="60", limit=200):
     if data["retCode"] != 0:
         raise Exception(data["retMsg"])
 
-    return data["result"]["list"]
+    candles = data["result"]["list"]
+
+    candles.reverse()
+
+    df = pd.DataFrame(
+        candles,
+        columns=[
+            "time",
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+            "turnover"
+        ]
+    )
+
+    df["open"] = df["open"].astype(float)
+    df["high"] = df["high"].astype(float)
+    df["low"] = df["low"].astype(float)
+    df["close"] = df["close"].astype(float)
+    df["volume"] = df["volume"].astype(float)
+
+    return df
