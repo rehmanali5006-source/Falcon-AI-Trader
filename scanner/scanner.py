@@ -1,7 +1,6 @@
 from scanner.coins import COINS
-from scanner.market import get_price
+from scanner.market import get_candles
 from scanner.strategy import check_signal
-import pandas as pd
 
 
 def scan_market():
@@ -14,21 +13,19 @@ def scan_market():
 
         try:
 
-            price = get_price(coin)
+            df = get_candles(coin)
 
-            # Dummy candles (temporary)
-            df = pd.DataFrame({
-                "close": [price] * 60
-            })
+            current_price = df.iloc[-1]["close"]
 
             signal = check_signal(df)
 
-            print(f"{coin}")
-            print(f"Price : {price}")
+            print(f"Coin   : {coin}")
+            print(f"Price  : {current_price}")
             print(f"Signal : {signal}")
-            print("-" * 40)
+            print("-" * 50)
 
         except Exception as e:
+
             print(f"{coin} ERROR : {e}")
 
 
