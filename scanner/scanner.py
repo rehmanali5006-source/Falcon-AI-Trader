@@ -13,7 +13,17 @@ def scan_market():
 
         try:
 
-            df = get_candles(coin)
+            # Get real market candles from Bybit
+            candles = get_candles(coin)
+
+            # Convert API response into DataFrame
+            close_prices = [float(c[4]) for c in reversed(candles)]
+
+            import pandas as pd
+
+            df = pd.DataFrame({
+                "close": close_prices
+            })
 
             current_price = df.iloc[-1]["close"]
 
