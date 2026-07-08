@@ -2,13 +2,12 @@ import pandas as pd
 
 
 def check_signal(df):
-    """
-    Returns:
-        BUY / SELL / HOLD
-    """
 
     if len(df) < 60:
-        return "HOLD"
+        return {
+            "signal": "HOLD",
+            "confidence": 0
+        }
 
     # EMA
     df["EMA20"] = df["close"].ewm(span=20).mean()
@@ -25,16 +24,27 @@ def check_signal(df):
 
     last = df.iloc[-1]
 
-    if (
-        last["EMA20"] > last["EMA50"]
-        and last["RSI"] < 35
-    ):
-        return "BUY"
+    confidence = 5
 
-    elif (
-        last["EMA20"] < last["EMA50"]
-        and last["RSI"] > 65
-    ):
-        return "SELL"
+    if last["EMA20"] > last["EMA50"]:
+        confidence += 2
 
-    return "HOLD"
+    if last["RSI"] < 35:
+        confidence += 2
+
+    if confidence > 10:
+        confidence = 10
+
+    if last["EMA20"] > last["EMA50"] and last["RSI"] < 35:
+        signal = "BUY"
+
+    elif last["EMA20"] < last["EMA50"] and last["RSI"] > 65:
+        signal = "SELL"
+
+    else:
+        signal = "HOLD"
+
+    return {
+        "signal": signal,
+        "confidence": confidence
+    }
