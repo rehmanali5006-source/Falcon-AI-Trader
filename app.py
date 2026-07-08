@@ -1,15 +1,9 @@
-from config import TIMEFRAME
+from scanner.market import get_price
 
 print("=" * 40)
-print("🦅 Falcon AI Trader v1.0")
+print("🦅 Falcon AI Trader")
 print("=" * 40)
 
-print()
+price = get_price("BTCUSDT")
 
-print("Timeframe :", TIMEFRAME)
-
-print("Bot Status : READY")
-
-print()
-
-print("Next Step : Connecting to Binance API...")
+print(f"BTC Price : {price}")
