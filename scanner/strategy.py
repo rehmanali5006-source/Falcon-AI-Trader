@@ -1,50 +1,40 @@
-import pandas as pd
+from scanner.indicators import add_indicators
 
 
 def check_signal(df):
 
-    if len(df) < 60:
-        return {
-            "signal": "HOLD",
-            "confidence": 0
-        }
-
-    # EMA
-    df["EMA20"] = df["close"].ewm(span=20).mean()
-    df["EMA50"] = df["close"].ewm(span=50).mean()
-
-    # RSI
-    delta = df["close"].diff()
-
-    gain = delta.where(delta > 0, 0).rolling(14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
-
-    rs = gain / loss
-    df["RSI"] = 100 - (100 / (1 + rs))
+    df = add_indicators(df)
 
     last = df.iloc[-1]
 
-    confidence = 5
+    score = 0
+    reasons = []
 
+    # EMA Trend
     if last["EMA20"] > last["EMA50"]:
-        confidence += 2
+        score += 35
+        reasons.append("EMA Bullish")
 
+    # RSI
     if last["RSI"] < 35:
-        confidence += 2
+        score += 30
+        reasons.append("RSI Oversold")
 
-    if confidence > 10:
-        confidence = 10
+    # MACD
+    if last["MACD"] > last["MACD_SIGNAL"]:
+        score += 35
+        reasons.append("MACD Bullish")
 
-    if last["EMA20"] > last["EMA50"] and last["RSI"] < 35:
+    # Final Signal
+    if score >= 70:
         signal = "BUY"
-
-    elif last["EMA20"] < last["EMA50"] and last["RSI"] > 65:
+    elif score <= 30:
         signal = "SELL"
-
     else:
         signal = "HOLD"
 
     return {
         "signal": signal,
-        "confidence": confidence
+        "score": score,
+        "reasons": reasons
     }
