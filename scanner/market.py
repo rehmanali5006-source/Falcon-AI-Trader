@@ -1,25 +1,21 @@
 import requests
 
-def get_price(symbol):
-    # Example: BTCUSDT -> bitcoin
-    mapping = {
-        "BTCUSDT": "bitcoin",
-        "ETHUSDT": "ethereum",
-        "BNBUSDT": "binancecoin",
-        "SOLUSDT": "solana",
-        "XRPUSDT": "ripple",
+BASE_URL = "https://api.bybit.com/v5/market/kline"
+
+def get_candles(symbol, interval="60", limit=200):
+    params = {
+        "category": "linear",
+        "symbol": symbol,
+        "interval": interval,
+        "limit": limit
     }
 
-    coin = mapping.get(symbol.upper())
+    response = requests.get(BASE_URL, params=params, timeout=10)
+    response.raise_for_status()
 
-    if coin is None:
-        raise Exception(f"Coin {symbol} not supported yet")
+    data = response.json()
 
-    url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin}&vs_currencies=usd"
+    if data["retCode"] != 0:
+        raise Exception(data["retMsg"])
 
-    r = requests.get(url, timeout=10)
-    r.raise_for_status()
-
-    data = r.json()
-
-    return data[coin]["usd"]
+    return data["result"]["list"]
