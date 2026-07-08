@@ -1,9 +1,13 @@
 from scanner.market import get_price
+from scanner.coins import COINS
 
 print("=" * 40)
-print("🦅 Falcon AI Trader")
+print("🚀 Falcon AI Trader")
 print("=" * 40)
 
-price = get_price("BTCUSDT")
-
-print(f"BTC Price : {price}")
+for coin in COINS:
+    try:
+        price = get_price(coin)
+        print(f"{coin:10} : ${price}")
+    except Exception as e:
+        print(f"{coin}: ERROR - {e}")
