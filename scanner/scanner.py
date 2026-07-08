@@ -1,25 +1,22 @@
 from scanner.coins import COINS
 from scanner.market import get_candles
 from scanner.strategy import check_signal
+import pandas as pd
 
 
 def scan_market():
 
-    print("=" * 50)
-    print(" Falcon AI Trader Scanner ")
-    print("=" * 50)
+    print("=" * 60)
+    print(" Falcon AI Trader ")
+    print("=" * 60)
 
     for coin in COINS:
 
         try:
 
-            # Get real market candles from Bybit
             candles = get_candles(coin)
 
-            # Convert API response into DataFrame
             close_prices = [float(c[4]) for c in reversed(candles)]
-
-            import pandas as pd
 
             df = pd.DataFrame({
                 "close": close_prices
@@ -27,15 +24,21 @@ def scan_market():
 
             current_price = df.iloc[-1]["close"]
 
-            signal = check_signal(df)
+            result = check_signal(df)
 
-            print(f"Coin   : {coin}")
-            print(f"Price  : {current_price}")
-            print(f"Signal : {signal}")
-            print("-" * 50)
+            print(f"\nCoin       : {coin}")
+            print(f"Price      : {current_price:.4f}")
+            print(f"Signal     : {result['signal']}")
+            print(f"Confidence : {result['score']}%")
+
+            if result["reasons"]:
+                print("Reasons:")
+                for reason in result["reasons"]:
+                    print(f"  ✔ {reason}")
+
+            print("-" * 60)
 
         except Exception as e:
-
             print(f"{coin} ERROR : {e}")
 
 
