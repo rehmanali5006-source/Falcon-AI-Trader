@@ -1,40 +1,22 @@
 import requests
 import pandas as pd
 
-BASE_URL = "https://api.bybit.com/v5/market/kline"
-
-HEADERS = {
-    "User-Agent": "Mozilla/5.0",
-    "Accept": "application/json"
-}
+BASE_URL = "https://api.binance.com/api/v3/klines"
 
 
-def get_candles(symbol, interval="60", limit=200):
+def get_candles(symbol, interval="1h", limit=200):
 
+    # BTCUSDT same rahega
     params = {
-        "category": "linear",
         "symbol": symbol,
         "interval": interval,
         "limit": limit
     }
 
-    response = requests.get(
-        BASE_URL,
-        params=params,
-        headers=HEADERS,
-        timeout=20
-    )
-
+    response = requests.get(BASE_URL, params=params, timeout=10)
     response.raise_for_status()
 
-    data = response.json()
-
-    if data["retCode"] != 0:
-        raise Exception(data["retMsg"])
-
-    candles = data["result"]["list"]
-
-    candles.reverse()
+    candles = response.json()
 
     df = pd.DataFrame(
         candles,
@@ -45,27 +27,40 @@ def get_candles(symbol, interval="60", limit=200):
             "low",
             "close",
             "volume",
-            "turnover"
+            "close_time",
+            "quote_volume",
+            "trades",
+            "taker_buy_base",
+            "taker_buy_quote",
+            "ignore"
         ]
     )
 
-    for col in [
+    df = df[[
+        "time",
         "open",
         "high",
         "low",
         "close",
-        "volume",
-        "turnover"
-    ]:
+        "volume"
+    ]]
+
+    numeric = [
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume"
+    ]
+
+    for col in numeric:
         df[col] = df[col].astype(float)
 
-    df["time"] = pd.to_datetime(
-        df["time"].astype(int),
-        unit="ms"
-    )
+    df["time"] = pd.to_datetime(df["time"], unit="ms")
 
     return df
 
 
 def get_price(symbol):
-    return float(get_candles(symbol, limit=1).iloc[-1]["close"])
+    df = get_candles(symbol, limit=1)
+    return float(df.iloc[-1]["close"])
