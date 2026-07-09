@@ -1,6 +1,7 @@
 from scanner.coins import COINS
 from scanner.market import get_candles
 from scanner.strategy import check_signal
+from scanner.notifier import send_notification
 import pandas as pd
 
 
@@ -35,6 +36,23 @@ def scan_market():
                 print("Reasons:")
                 for reason in result["reasons"]:
                     print(f"  ✔ {reason}")
+
+            # Send notification only for BUY or SELL
+            if result["signal"] in ["BUY", "SELL"]:
+
+                message = (
+                    f"{result['signal']} SIGNAL\n\n"
+                    f"Coin: {coin}\n"
+                    f"Price: {current_price:.4f}\n"
+                    f"Confidence: {result['score']}%\n\n"
+                )
+
+                if result["reasons"]:
+                    message += "Reasons:\n"
+                    for reason in result["reasons"]:
+                        message += f"• {reason}\n"
+
+                send_notification(message)
 
             print("-" * 60)
 
