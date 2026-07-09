@@ -12,7 +12,7 @@ def check_signal(df):
 
     # EMA Trend
     if last["EMA20"] > last["EMA50"]:
-        score += 35
+        score += 40
         reasons.append("EMA Bullish")
 
     # RSI
@@ -22,7 +22,7 @@ def check_signal(df):
 
     # MACD
     if last["MACD"] > last["MACD_SIGNAL"]:
-        score += 35
+        score += 30
         reasons.append("MACD Bullish")
 
     # Final Signal
