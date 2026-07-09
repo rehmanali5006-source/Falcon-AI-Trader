@@ -1,41 +1,56 @@
 import requests
 import pandas as pd
 
-# CoinGecko Coin IDs
-COIN_IDS = {
-    "BTCUSDT": "bitcoin",
-    "ETHUSDT": "ethereum",
-    "BNBUSDT": "binancecoin",
-    "SOLUSDT": "solana",
-    "XRPUSDT": "ripple"
-}
+BASE_URL = "https://api.bybit.com/v5/market/kline"
+
+
+def get_candles(symbol, interval="60", limit=200):
+
+    params = {
+        "category": "linear",
+        "symbol": symbol,
+        "interval": interval,
+        "limit": limit
+    }
+
+    headers = {
+        "User-Agent": "FalconAITrader/1.0"
+    }
+
+    response = requests.get(
+        BASE_URL,
+        params=params,
+        headers=headers,
+        timeout=20
+    )
+
+    response.raise_for_status()
+
+    data = response.json()
+
+    if data["retCode"] != 0:
+        raise Exception(data["retMsg"])
+
+    candles = list(reversed(data["result"]["list"]))
+
+    df = pd.DataFrame(candles, columns=[
+        "time",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "turnover"
+    ])
+
+    for col in ["open", "high", "low", "close", "volume", "turnover"]:
+        df[col] = df[col].astype(float)
+
+    df["time"] = pd.to_datetime(df["time"].astype(int), unit="ms")
+
+    return df
 
 
 def get_price(symbol):
-    coin = COIN_IDS[symbol]
-
-    url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin}&vs_currencies=usd"
-
-    r = requests.get(url, timeout=10)
-    r.raise_for_status()
-
-    data = r.json()
-
-    return float(data[coin]["usd"])
-
-
-def get_candles(symbol, interval="1h", limit=200):
-    # CoinGecko free API historical candles nahi deti
-    # Isliye abhi sirf current price return karenge
-    price = get_price(symbol)
-
-    df = pd.DataFrame({
-        "time": [pd.Timestamp.now()],
-        "open": [price],
-        "high": [price],
-        "low": [price],
-        "close": [price],
-        "volume": [0]
-    })
-
-    return df
+    df = get_candles(symbol, limit=1)
+    return float(df.iloc[-1]["close"])
