@@ -7,6 +7,9 @@ import pandas as pd
 
 def scan_market():
 
+    # Temporary Test Notification
+    send_notification("Falcon AI Trader Test Notification")
+
     print("=" * 60)
     print(" Falcon AI Trader ")
     print("=" * 60)
@@ -37,7 +40,7 @@ def scan_market():
                 for reason in result["reasons"]:
                     print(f"  ✔ {reason}")
 
-            # Send notification only for BUY or SELL
+            # Notification only for BUY or SELL
             if result["signal"] in ["BUY", "SELL"]:
 
                 message = (
