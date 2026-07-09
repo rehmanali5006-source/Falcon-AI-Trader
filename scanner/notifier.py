@@ -1,6 +1,6 @@
 import requests
 
-NTFY_TOPIC = "falcon-ai-trader"
+NTFY_TOPIC = "crypto-alerts"
 
 
 def send_notification(message):
