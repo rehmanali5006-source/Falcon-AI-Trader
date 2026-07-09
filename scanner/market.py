@@ -21,18 +21,25 @@ def get_candles(symbol, interval="60", limit=200):
     if data["retCode"] != 0:
         raise Exception(data["retMsg"])
 
-    candles = list(reversed(data["result"]["list"]))
+    candles = data["result"]["list"]
 
-    df = pd.DataFrame(candles, columns=[
-        "timestamp",
-        "open",
-        "high",
-        "low",
-        "close",
-        "volume",
-        "turnover"
-    ])
+    # Oldest candle first
+    candles.reverse()
 
+    df = pd.DataFrame(
+        candles,
+        columns=[
+            "time",
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+            "turnover"
+        ]
+    )
+
+    # Convert numeric columns
     numeric_columns = [
         "open",
         "high",
@@ -44,6 +51,8 @@ def get_candles(symbol, interval="60", limit=200):
 
     for col in numeric_columns:
         df[col] = df[col].astype(float)
+
+    df["time"] = pd.to_datetime(df["time"].astype(int), unit="ms")
 
     return df
 
