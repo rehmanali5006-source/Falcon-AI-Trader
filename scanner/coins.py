@@ -3,5 +3,5 @@ COINS = [
     "ETHUSDT",
     "BNBUSDT",
     "SOLUSDT",
-    "XRPUSDT",
+    "XRPUSDT"
 ]
