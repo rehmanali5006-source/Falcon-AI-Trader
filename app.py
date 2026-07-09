@@ -1,40 +1,59 @@
-from scanner.market import get_price
 from scanner.coins import COINS
-import requests
+from scanner.market import get_candles
+from scanner.strategy import check_signal
+from scanner.notifier import send_notification
 
-# Apna ntfy topic
-NTFY_TOPIC = "crypto-alerts"
 
-print("=" * 50)
-print("🚀 Falcon AI Trader")
-print("=" * 50)
+def main():
 
-message = "🚀 Falcon AI Trader\n\n"
+    print("=" * 60)
+    print("🚀 Falcon AI Trader")
+    print("=" * 60)
 
-for coin in COINS:
-    try:
-        price = get_price(coin)
+    for coin in COINS:
 
-        print(f"{coin:10} : ${price}")
+        try:
 
-        message += f"{coin}: ${price}\n"
+            df = get_candles(coin)
 
-    except Exception as e:
-        print(f"{coin}: ERROR - {e}")
-        message += f"{coin}: ERROR\n"
+            result = check_signal(df)
 
-try:
-    requests.post(
-        f"https://ntfy.sh/{NTFY_TOPIC}",
-        data=message.encode("utf-8"),
-        headers={
-            "Title": "Falcon AI Trader",
-            "Priority": "3"
-        },
-        timeout=10
-    )
+            price = df.iloc[-1]["close"]
 
-    print("\n✅ Notification Sent")
+            print(f"\nCoin       : {coin}")
+            print(f"Price      : {price:.4f}")
+            print(f"Signal     : {result['signal']}")
+            print(f"Confidence : {result['score']}%")
 
-except Exception as e:
-    print("\n❌ Notification Failed:", e)
+            if result["reasons"]:
+                print("Reasons:")
+                for reason in result["reasons"]:
+                    print(f"  ✔ {reason}")
+
+            print("-" * 60)
+
+            if result["signal"] in ["BUY", "SELL"]:
+
+                message = (
+                    f"{result['signal']} SIGNAL\n\n"
+                    f"Coin: {coin}\n"
+                    f"Price: {price:.4f}\n"
+                    f"Confidence: {result['score']}%\n\n"
+                    f"Reasons:\n"
+                )
+
+                for reason in result["reasons"]:
+                    message += f"• {reason}\n"
+
+                send_notification(
+                    f"{coin} {result['signal']}",
+                    message
+                )
+
+        except Exception as e:
+
+            print(f"{coin} ERROR : {e}")
+
+
+if __name__ == "__main__":
+    main()
