@@ -21,27 +21,33 @@ def get_candles(symbol, interval="60", limit=200):
     if data["retCode"] != 0:
         raise Exception(data["retMsg"])
 
-    candles = data["result"]["list"]
+    candles = list(reversed(data["result"]["list"]))
 
-    candles.reverse()
+    df = pd.DataFrame(candles, columns=[
+        "timestamp",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "turnover"
+    ])
 
-    df = pd.DataFrame(
-        candles,
-        columns=[
-            "time",
-            "open",
-            "high",
-            "low",
-            "close",
-            "volume",
-            "turnover"
-        ]
-    )
+    numeric_columns = [
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "turnover"
+    ]
 
-    df["open"] = df["open"].astype(float)
-    df["high"] = df["high"].astype(float)
-    df["low"] = df["low"].astype(float)
-    df["close"] = df["close"].astype(float)
-    df["volume"] = df["volume"].astype(float)
+    for col in numeric_columns:
+        df[col] = df[col].astype(float)
 
     return df
+
+
+def get_price(symbol):
+    df = get_candles(symbol, limit=1)
+    return float(df.iloc[-1]["close"])
