@@ -3,9 +3,6 @@ name: Falcon AI Trader
 on:
   workflow_dispatch:
 
-  schedule:
-    - cron: '0 * * * *'
-
 jobs:
   scan:
     runs-on: ubuntu-latest
