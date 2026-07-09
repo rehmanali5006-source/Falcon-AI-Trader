@@ -14,7 +14,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - run: |
+      - name: Install Requirements
+        run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
@@ -31,6 +32,21 @@ jobs:
         run: |
           cat scanner/market.py
 
-      - name: Run Bot
+      - name: Debug Python Imports
         run: |
-          python app.py
+          python - << 'EOF'
+          import scanner.market
+
+          print("================================")
+          print("Market File Used:")
+          print(scanner.market.__file__)
+          print("================================")
+
+          from scanner.market import get_candles
+
+          try:
+              df = get_candles("BTCUSDT")
+              print(df.head())
+          except Exception as e:
+              print("ERROR:", e)
+          EOF
