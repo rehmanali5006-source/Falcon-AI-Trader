@@ -1,7 +1,2 @@
-python-binance
-pandas
-numpy
 requests
-ta
-schedule
-python-dotenv
+pandas
